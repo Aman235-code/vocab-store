@@ -5,9 +5,10 @@ import WordList from "./components/WordList";
 import EditModal from "./components/EditModal";
 import AddWordModal from "./components/AddWordModal";
 import Pagination from "./components/Pagination";
-import { FiPlus } from "react-icons/fi";
-import { FiBookOpen } from "react-icons/fi";
+import { FiPlus, FiBookOpen } from "react-icons/fi";
 import { motion } from "framer-motion";
+import toast, { Toaster } from "react-hot-toast";
+import ConfirmModal from "./components/ConfirmModal";
 
 export default function App() {
   const WORDS_PER_PAGE = 5;
@@ -24,29 +25,26 @@ export default function App() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [currentPage, setCurrentPage] = React.useState(1);
   const [editingWordId, setEditingWordId] = React.useState(null);
-
   const [addModalOpen, setAddModalOpen] = React.useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [wordToDelete, setWordToDelete] = React.useState(null);
 
-  // Add form state for modal
   const [addForm, setAddForm] = React.useState({
     word: "",
     meaning: "",
     examples: [""],
   });
 
-  // Edit form state
   const [editForm, setEditForm] = React.useState({
     word: "",
     meaning: "",
     examples: [""],
   });
 
-  // Filter words by search
   const filteredWords = words.filter(({ word }) =>
     word.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Pagination
   const totalPages = Math.ceil(filteredWords.length / WORDS_PER_PAGE);
   const paginatedWords = filteredWords.slice(
     (currentPage - 1) * WORDS_PER_PAGE,
@@ -72,7 +70,7 @@ export default function App() {
   function handleAddSubmit(e) {
     e.preventDefault();
     if (!addForm.word.trim() || !addForm.meaning.trim()) {
-      alert("Word and meaning are required.");
+      toast.error("Word and meaning are required.");
       return;
     }
     const newWord = {
@@ -84,13 +82,20 @@ export default function App() {
     setWords([newWord, ...words]);
     setAddForm({ word: "", meaning: "", examples: [""] });
     setAddModalOpen(false);
+    toast.success("Word added successfully!");
   }
 
   // Delete handler
   function handleDelete(id) {
-    if (window.confirm("Are you sure you want to delete this word?")) {
-      setWords(words.filter((w) => w.id !== id));
-    }
+    setWordToDelete(id);
+    setDeleteModalOpen(true);
+  }
+
+  function confirmDelete() {
+    setWords(words.filter((w) => w.id !== wordToDelete));
+    toast.success("Word deleted successfully!");
+    setDeleteModalOpen(false);
+    setWordToDelete(null);
   }
 
   // Edit modal open
@@ -120,7 +125,7 @@ export default function App() {
 
   function handleEditSave() {
     if (!editForm.word.trim() || !editForm.meaning.trim()) {
-      alert("Word and meaning cannot be empty.");
+      toast.error("Word and meaning cannot be empty.");
       return;
     }
     const updatedWord = {
@@ -131,10 +136,13 @@ export default function App() {
     };
     setWords(words.map((w) => (w.id === editingWordId ? updatedWord : w)));
     setEditingWordId(null);
+    toast.success("Word updated successfully!");
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-300 via-pink-300 to-indigo-400 p-6 flex flex-col items-center">
+      <Toaster position="top-center" reverseOrder={false} />
+
       <motion.h1
         className="flex items-center justify-center gap-3
                  text-4xl font-extrabold mb-6
@@ -151,7 +159,6 @@ export default function App() {
         Vocab Store
       </motion.h1>
 
-      {/* Glassmorphic container */}
       <div className="w-full max-w-4xl bg-white bg-opacity-20 backdrop-blur-md rounded-xl p-6 shadow-lg">
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
@@ -181,6 +188,13 @@ export default function App() {
           words={paginatedWords}
           onDelete={handleDelete}
           onEdit={openEditModal}
+        />
+
+        <ConfirmModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirm={confirmDelete}
+          message="Are you sure you want to delete this word?"
         />
 
         <Pagination
