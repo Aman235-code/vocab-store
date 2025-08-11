@@ -6,6 +6,8 @@ import EditModal from "./components/EditModal";
 import AddWordModal from "./components/AddWordModal";
 import Pagination from "./components/Pagination";
 import { FiPlus } from "react-icons/fi";
+import { FiBookOpen } from "react-icons/fi";
+import { motion } from "framer-motion";
 
 export default function App() {
   const WORDS_PER_PAGE = 5;
@@ -133,23 +135,47 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-300 via-pink-300 to-indigo-400 p-6 flex flex-col items-center">
-      <h1 className="text-4xl font-extrabold mb-6 text-white drop-shadow-lg">
+      <motion.h1
+        className="flex items-center justify-center gap-3
+                 text-4xl font-extrabold mb-6
+                 text-black drop-shadow-lg
+                 bg-white bg-opacity-20 backdrop-blur-md
+                 rounded-xl px-6 py-4 shadow-lg
+                 cursor-default select-none
+                 hover:bg-opacity-40 transition duration-300"
+        whileHover={{ scale: 1.05, rotate: 2 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        <FiBookOpen size={40} className="text-indigo-300" />
         Vocab Store
-      </h1>
+      </motion.h1>
 
       {/* Glassmorphic container */}
       <div className="w-full max-w-4xl bg-white bg-opacity-20 backdrop-blur-md rounded-xl p-6 shadow-lg">
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-        <button
-          onClick={() => setAddModalOpen(true)}
-          className="mb-6 flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition"
-          type="button"
-          aria-label="Add New Word"
-        >
-          <FiPlus size={24} />
-          Add Word
-        </button>
+        <div className="flex justify-center">
+          <motion.button
+            onClick={() => setAddModalOpen(true)}
+            type="button"
+            aria-label="Add New Word"
+            className="mb-6 mt-6 flex items-center gap-2 px-6 py-3
+               bg-yellow-300 bg-opacity-20 backdrop-blur-md
+               text-red-500 font-semibold rounded-full shadow-lg
+               cursor-pointer
+               hover:bg-opacity-40 hover:shadow-xl
+               transition duration-300"
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 0 15px rgba(99, 102, 241, 0.7)",
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <FiPlus size={24} />
+            Add Word
+          </motion.button>
+        </div>
 
         <WordList
           words={paginatedWords}
